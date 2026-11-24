@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101f2c">
+<title>चरी उड · Himalayan Arcade</title>
+<link rel="stylesheet" href="style.css?v=chari-udd">
+<script type="module" src="game.js?v=district-tour"></script>
+</head>
+<body>
+<main id="arcade" aria-label="चरी उड arcade">
+<canvas id="scene" aria-label="Flight through Himalayan gates"></canvas>
+<header>
+  <div class="brand"><span class="mark">◈</span> <span class="game-name" lang="ne">चरी उड</span></div>
+  <div class="toolbar"><button id="sound" aria-label="Toggle sound" title="Toggle sound">♪</button><button id="full" aria-label="Toggle fullscreen" title="Toggle fullscreen">⛶</button><button id="pause" aria-label="Pause" title="Pause" hidden>Ⅱ</button></div>
+</header>
+<section id="hud" hidden aria-label="Flight statistics">
+  <div><small>SCORE</small><b id="score">0</b></div><div><small>BEST</small><b id="best">0</b></div><div class="gold"><small>COINS</small><b id="coins">0</b></div>
+  <div id="power" hidden><small>SHIELD</small><b id="shield">0s</b></div>
+</section>
+<div id="overlay">
+<section class="panel pilot-panel" id="profile" aria-labelledby="pilot-title">
+<div class="kicker game-name" lang="ne">चरी उड</div>
+<h1 id="pilot-title">Set up your pilot</h1>
+<form id="pilot-form">
+  <div class="pilot-photo-row">
+    <div class="pilot-portrait"><img id="pilot-preview" alt="Pilot photo preview" hidden><span id="pilot-placeholder" aria-hidden="true">◈</span></div>
+    <div>
+      <label for="pilot-photo">Pilot photo <small>Optional</small></label>
+      <input id="pilot-photo" type="file" accept="image/*">
+      <button id="pilot-remove" type="button" class="quiet" hidden>Remove photo</button>
+    </div>
+  </div>
+  <fieldset id="pilot-adjust" hidden>
+    <legend>Adjust photo crop</legend>
+    <label>Zoom <input id="pilot-zoom" type="range" min="100" max="300" value="100"></label>
+    <label>Left / right <input id="pilot-horizontal" type="range" min="0" max="100" value="50"></label>
+    <label>Up / down <input id="pilot-vertical" type="range" min="0" max="100" value="50"></label>
+  </fieldset>
+  <p id="pilot-status" role="status"></p>
+  <label for="pilot-name">Pilot name</label>
+  <input id="pilot-name" type="text" required maxlength="24" placeholder="Enter your name" autocomplete="nickname">
+  <button type="submit" class="primary">Continue</button>
+</form>
+</section>
+<section class="menu" id="home" aria-labelledby="title" hidden>
+  <div class="kicker"><span></span> HIMALAYAN ARCADE <span></span></div>
+  <h1 id="title" class="game-name" lang="ne">चरी उड</h1>
+  <p class="tagline" id="pilot-greeting"></p>
+  <div class="actions">
+  <button data-action="play" class="primary"><span id="play-label">Play</span> <span id="mode-label">Normal</span></button>
+  <div class="row"><button data-action="settings">Settings</button><button data-action="leaderboard">Leaderboard</button></div>
+  <button data-action="route">Nepal route <span id="tour-progress"></span></button>
+  <button data-action="help" class="quiet">How to Play</button>
+  </div>
+</section>
+<section class="panel" id="settings" hidden>
+<h2>Settings</h2>
+<label>Difficulty<select id="difficulty"><option>Easy</option><option selected>Normal</option><option>Hard</option><option>Extreme</option></select></label>
+<label>Music <input id="music" type="range" min="0" max="100"></label>
+<label>Effects <input id="effects" type="range" min="0" max="100"></label>
+<button data-action="profile">Edit pilot</button>
+<button data-action="home" class="primary">Done</button>
+</section>
+<section class="panel" id="leaderboard" hidden><h2>Leaderboard</h2><p>Best flights on this browser</p><div id="records"></div><button data-action="home" class="primary">Back</button></section>
+<section class="panel" id="route" hidden aria-labelledby="route-title"><h2 id="route-title">Nepal route</h2><p id="route-progress"></p><ol id="route-list"></ol><button data-action="home" class="primary">Back</button></section>
+<section class="panel" id="help" hidden><h2>How to Play</h2><ul><li>Press Space, click, or tap to lift. Release to fall.</li><li>Each gate scores a point. Clear three gates to reach the next district and save a checkpoint.</li><li>Collect amber coins and cyan shields. A shield absorbs one gate hit within six seconds.</li><li>Press Esc or P to pause. Avoid the lower and upper edges.</li></ul><button data-action="home" class="primary">Got it</button></section>
+<section class="panel" id="paused" hidden><h2>Flight paused</h2><button data-action="resume" class="primary">Resume</button><div class="row"><button data-action="play">Restart</button><button data-action="home">Main menu</button></div></section>
+<section class="panel" id="over" hidden><div class="kicker" id="result-label">FLIGHT COMPLETE</div><h2>Run summary</h2><p id="result-district"></p><div id="stats"></div><button id="retry" data-action="play" class="primary">Try Again</button><button data-action="home" class="quiet">Main menu</button></section>
+</div>
+<section id="district-display" aria-label="Current district" hidden>
+  <div id="district-banner" role="status"><b id="district-welcome"></b><small id="district-route-count"></small></div>
+  <span id="district-landmark"></span>
+</section>
+<div id="cue" hidden>SPACE / CLICK / TAP TO LIFT</div>
+<footer><span><span class="game-name" lang="ne">चरी उड</span></span><span id="phase">GOLDEN HOUR</span></footer>
+</main>
+</body>
+</html>

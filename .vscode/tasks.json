@@ -1,0 +1,22 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run चरी उड",
+      "type": "process",
+      "command": "python3",
+      "args": ["-m", "http.server", "8765", "--bind", "127.0.0.1", "--directory", "dist"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Build offline game",
+      "type": "process",
+      "command": "python3",
+      "args": ["tools/package.py"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": []
+    }
+  ]
+}

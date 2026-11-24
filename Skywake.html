@@ -1,0 +1,1294 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101f2c">
+<title>चरी उड · Himalayan Arcade</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,sans-serif;color:#f6f7f8;background:#101f2c;--amber:#ffcd88}
+*{box-sizing:border-box}
+body{margin:0;overscroll-behavior:none}
+[hidden]{display:none!important}
+#arcade{position:relative;isolation:isolate;height:100vh;height:100dvh;overflow:hidden;touch-action:manipulation}
+#scene{position:absolute;width:100%;height:100%;inset:0;touch-action:none}
+header,footer{position:absolute;left:clamp(14px,4vw,56px);right:clamp(14px,4vw,56px);display:flex;align-items:center;justify-content:space-between;z-index:3}
+header{top:max(15px,env(safe-area-inset-top))}
+footer{bottom:max(14px,env(safe-area-inset-bottom));font-size:.72rem;letter-spacing:.18em;color:#e1e7ec;pointer-events:none;text-shadow:0 2px 6px #000}
+.brand{letter-spacing:.18em;font-size:.78rem;font-weight:800;text-shadow:0 2px 8px #000}
+.mark{color:var(--amber);font-size:1.3rem;vertical-align:middle;margin-right:8px}
+.toolbar,.row{display:flex;gap:8px}
+button,select{font:inherit;color:inherit;border:1px solid #a3c5d346;border-radius:11px;background:#122432e8;cursor:pointer;min-height:44px;padding:10px 16px;font-weight:650;transition:background .16s,transform .16s,border .16s}
+button:hover{background:#2c4658;border-color:#c5e0ee99}
+button:active{transform:scale(.97)}
+:focus-visible{outline:2px solid #a6ffff;outline-offset:4px}
+.toolbar button{width:44px;padding:0;font-size:1.15rem}
+#overlay{position:absolute;inset:66px 12px 40px;display:grid;place-items:center;pointer-events:none}
+.menu,.panel{pointer-events:auto;text-align:center;max-width:100%;max-height:100%;overflow:auto;scrollbar-width:thin;animation:arrive .34s ease-out both}
+@keyframes arrive{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+.menu{padding:8px 5px;overflow:visible}
+.kicker{display:flex;gap:12px;justify-content:center;align-items:center;color:var(--amber);font-size:.77rem;letter-spacing:.29em;font-weight:800;text-shadow:0 2px 7px #1e2431}
+.kicker span{height:1px;width:clamp(16px,4vw,46px);background:currentColor}
+h1{font-family:Impact,'Arial Black',system-ui,sans-serif;font-weight:950;font-size:clamp(3.1rem,12vw,10rem);letter-spacing:.035em;line-height:.95;margin:15px 0 0;color:#fff3df;text-shadow:0 4px 0 #663a3d,0 15px 55px #141423a8}
+.tagline{margin:18px 0 26px;color:#fff3e4;text-shadow:0 2px 8px #0d1627}
+.actions{max-width:315px;margin:auto;display:grid;gap:8px}
+.row>*{flex:1}
+.primary{background:var(--amber);color:#2b201b;border-color:#ffe8bb;font-weight:850;box-shadow:0 7px 27px #f797423a}
+.primary:hover{background:#ffe2ad;border-color:#fff2d5}
+.primary span{margin-left:8px;font-size:.78em;opacity:.73}
+.quiet{background:#101f2c9e}
+.panel{width:420px;padding:clamp(16px,4vw,30px);border:1px solid #b6daee50;border-radius:22px;background:#0d1b28f4;box-shadow:0 24px 70px #030b15aa}
+.panel h2{font-size:clamp(1.6rem,5vw,2.3rem);margin:0 0 15px;letter-spacing:-.035em}
+.panel p{color:#bbcbd7}
+.panel>button,.panel>.row{width:100%;margin-top:8px}
+.panel label{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;text-align:left}
+input[type=range]{width:min(48%,180px);accent-color:var(--amber)}
+ul{text-align:left;padding-left:22px;line-height:1.55}
+li+li{margin-top:8px}
+#hud{position:absolute;top:70px;left:50%;transform:translateX(-50%);display:flex;gap:clamp(14px,4vw,38px);border:1px solid #c8e6f24e;border-radius:14px;background:#0f1e2ddd;padding:9px 20px;text-align:center;pointer-events:none}
+small{font-size:.7rem;font-weight:750;letter-spacing:.14em;color:#c5d5df}
+#hud b,#stats b{display:block;font-size:1.45rem;font-variant-numeric:tabular-nums}
+.gold,#result-label{color:var(--amber)}
+#power{color:#83fff3}
+#stats{display:flex;justify-content:space-around;margin:22px 0}
+#records{display:grid;gap:6px;margin:12px 0}
+.record{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;text-align:left;padding:9px;background:#1b3243;border-radius:8px;font-size:.9rem}
+#cue{position:absolute;bottom:12%;width:100%;text-align:center;font-size:.78rem;font-weight:800;letter-spacing:.18em;text-shadow:0 2px 8px #000;pointer-events:none}
+#over .kicker{margin-bottom:8px}
+@media(max-height:530px){h1{font-size:clamp(2.5rem,12vh,5rem)}.tagline{margin:8px 0 12px}.menu{overflow:auto}.panel{padding:13px}#hud{top:15px;gap:12px;padding:5px 10px}.brand{max-width:90px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+.pilot-panel{text-align:left}
+.pilot-panel .kicker{justify-content:flex-start;margin-bottom:8px}
+.pilot-panel h1{margin:0 0 20px;color:#f6f7f8;font:800 clamp(1.6rem,5vw,2.3rem)/1.1 system-ui,sans-serif;letter-spacing:-.035em;text-shadow:none}
+.pilot-photo-row{display:grid;grid-template-columns:72px minmax(0,1fr);align-items:center;gap:14px;margin-bottom:12px}
+.pilot-portrait{width:72px;height:72px;display:grid;place-items:center;overflow:hidden;border:1px solid #abc9dd70;border-radius:50%;background:#173040;color:var(--amber);font-size:2rem}
+.pilot-portrait img{width:100%;height:100%;object-fit:contain}
+.pilot-panel label{font-weight:650;margin-bottom:6px}
+.pilot-panel input[type=file]{font:inherit;width:100%;color:#c5d5df;font-size:.86rem}
+.pilot-panel input::file-selector-button{font:inherit;border:1px solid #a3c5d346;border-radius:8px;background:#254256;color:#f6f7f8;padding:8px;cursor:pointer}
+.pilot-panel input[type=text]{width:100%;min-height:44px;padding:10px 12px;border:1px solid #a3c5d36b;border-radius:10px;background:#152936;color:#fff;font:inherit}
+.pilot-panel form>.primary{width:100%;margin-top:14px}
+.pilot-panel fieldset{border:1px solid #a3c5d346;border-radius:10px;margin:0 0 10px;padding:8px 10px}
+.pilot-panel legend,.pilot-panel #pilot-status{font-size:.85rem}
+#pilot-status:empty{display:none}
+#pilot-remove{min-height:32px;margin-top:5px;padding:4px 8px;font-size:.85rem}
+.record{grid-template-columns:minmax(0,2fr) 1fr 1fr;overflow-wrap:anywhere}
+#play-label{margin:0;opacity:1;font-size:inherit}
+#tour-progress{display:block;font-size:.75rem;color:#bed0db}
+#district-display{position:absolute;inset:0;pointer-events:none;color:#fff3de}
+#district-banner{position:absolute;left:50%;top:clamp(125px,22%,205px);width:max-content;max-width:94%;transform:translateX(-50%);padding:10px 20px;border:1px solid #ffe5b65c;border-radius:13px;background:#172c3be0;text-align:center;transition:transform .35s,background .35s,border-color .35s}
+#district-welcome{display:block;font-size:clamp(1rem,4vw,1.6rem);text-shadow:0 2px 4px #0d1627}
+#district-route-count{display:block;margin-top:3px}
+#district-banner.settled{transform:translateX(-50%) scale(.77);transform-origin:top center;background:#172c3bb8;border-color:transparent}
+#district-landmark{position:absolute;top:86.1%;left:75%;transform:translateX(-50%);width:max-content;max-width:45%;padding:3px 8px;border-radius:6px;background:#0a1825d6;text-align:center;font-size:clamp(.69rem,1.7vw,.83rem);font-weight:650;line-height:1.16;text-shadow:0 1px 3px #000}
+#cue{bottom:6%}
+#route-list{max-height:min(48vh,440px);overflow:auto;text-align:left;margin:0;padding:0 5px 0 30px;scrollbar-width:thin}
+#route-list li{padding-left:6px;color:#c4d4dc;font-size:.82rem}
+.route-stop{width:100%;text-align:left;padding:7px 10px;border-radius:8px}
+.route-stop span,.route-stop small{display:block}
+.route-stop small{letter-spacing:0;font-weight:500}
+.route-stop.locked{border:1px solid #829eab28;color:#afc1cd}
+@media(max-aspect-ratio:68/100){#district-landmark{left:69%;max-width:57%}}
+@media(max-height:530px){#district-banner{top:70px;padding:5px 12px}#district-route-count{margin:0}#district-landmark{top:84%}}
+
+.game-name{font-family:"Kohinoor Devanagari","Noto Sans Devanagari","Mangal",system-ui,sans-serif;letter-spacing:0}
+h1.game-name{line-height:1.15}
+
+</style>
+<script type="module">
+// Each consecutive pair shares a boundary in Nepal GeoJSON (see README).
+const districts = [
+  ["Kathmandu", "Boudhanath Stupa", "stupa", "valley", "Bagmati"],
+  ["Nuwakot", "Nuwakot Durbar", "durbar", "hills", "Bagmati"],
+  ["Rasuwa", "Gosaikunda", "lake", "high", "Bagmati"],
+  ["Sindhupalchok", "Panch Pokhari", "lake", "high", "Bagmati"],
+  ["Dolakha", "Dolakha Bhimsen Temple", "pagoda", "hills", "Bagmati"],
+  ["Ramechhap", "Khandadevi Temple", "shrine", "hills", "Bagmati"],
+  ["Okhaldhunga", "Okhaldhunga Stone Mortar", "ruins", "hills", "Koshi"],
+  ["Solukhumbu", "Mount Everest", "peak", "high", "Koshi"],
+  ["Khotang", "Halesi Mahadev Cave", "cave", "hills", "Koshi"],
+  ["Bhojpur", "Dingla, Sadananda", "village", "hills", "Koshi"],
+  ["Sankhuwasabha", "Mount Makalu", "peak", "high", "Koshi"],
+  ["Taplejung", "Pathibhara Temple", "shrine", "high", "Koshi"],
+  ["Tehrathum", "Hyatrung Waterfall", "falls", "hills", "Koshi"],
+  ["Panchthar", "Silauti", "shrine", "hills", "Koshi"],
+  ["Ilam", "Kanyam Tea Gardens", "terraces", "hills", "Koshi"],
+  ["Jhapa", "Arjundhara Jaleshwar Dham", "shrine", "plains", "Koshi"],
+  ["Morang", "Birat Raja's Palace Ruins", "ruins", "plains", "Koshi"],
+  ["Dhankuta", "Chhintang Jalpa Devi Temple", "pagoda", "hills", "Koshi"],
+  ["Sunsari", "Barahakshetra Temple", "pagoda", "plains", "Koshi"],
+  ["Saptari", "Chhinnamasta Temple", "shrine", "plains", "Madhesh"],
+  ["Udayapur", "Chaudandigadhi Fort", "fort", "hills", "Koshi"],
+  ["Siraha", "Salhesh Phulbari", "grove", "plains", "Madhesh"],
+  ["Dhanusha", "Janaki Mandir", "janaki", "plains", "Madhesh"],
+  ["Mahottari", "Jaleshwar Mahadev Temple", "shrine", "plains", "Madhesh"],
+  ["Sarlahi", "Bharat Lake", "lake", "plains", "Madhesh"],
+  ["Sindhuli", "Sindhuligadhi Fort", "fort", "hills", "Bagmati"],
+  ["Kavrepalanchok", "Namo Buddha", "stupa", "hills", "Bagmati"],
+  ["Bhaktapur", "Nyatapola Temple", "pagoda", "valley", "Bagmati"],
+  ["Lalitpur", "Krishna Mandir, Patan", "shikhara", "valley", "Bagmati"],
+  ["Makwanpur", "Makwanpurgadhi Fort", "fort", "hills", "Bagmati"],
+  ["Rautahat", "Nunthar", "river", "plains", "Madhesh"],
+  ["Bara", "Gadhimai Temple", "shrine", "plains", "Madhesh"],
+  ["Parsa", "Gahawa Mai Temple", "shikhara", "plains", "Madhesh"],
+  ["Chitwan", "Chitwan National Park", "grove", "plains", "Bagmati"],
+  ["Dhading", "Ganesh Himal", "peak", "high", "Bagmati"],
+  ["Gorkha", "Gorkha Durbar", "durbar", "hills", "Gandaki"],
+  ["Lamjung", "Ghalegaun", "village", "hills", "Gandaki"],
+  ["Tanahun", "Bandipur Old Bazaar", "village", "hills", "Gandaki"],
+  ["Nawalpur", "Shashwat Dham", "shikhara", "plains", "Gandaki"],
+  ["Parasi", "Ramagrama Stupa", "mound", "plains", "Lumbini"],
+  ["Rupandehi", "Maya Devi Temple, Lumbini", "sanctuary", "plains", "Lumbini"],
+  ["Kapilvastu", "Tilaurakot", "ruins", "plains", "Lumbini"],
+  ["Arghakhanchi", "Supadeurali Temple", "shikhara", "hills", "Lumbini"],
+  ["Palpa", "Rani Mahal", "palace", "hills", "Lumbini"],
+  ["Syangja", "Aandhikhola River", "river", "hills", "Gandaki"],
+  ["Parbat", "Kushma Suspension Bridge", "bridge", "hills", "Gandaki"],
+  ["Kaski", "Machhapuchhre", "peak", "high", "Gandaki"],
+  ["Manang", "Tilicho Lake", "lake", "high", "Gandaki"],
+  ["Mustang", "Lo Manthang", "fort", "dry", "Gandaki"],
+  ["Myagdi", "Dhaulagiri", "peak", "high", "Gandaki"],
+  ["Dolpa", "Shey Phoksundo Lake", "lake", "high", "Karnali"],
+  ["Rukum East", "Sisne Himal", "peak", "high", "Lumbini"],
+  ["Baglung", "Baglung Kalika Temple", "pagoda", "hills", "Gandaki"],
+  ["Gulmi", "Resunga", "shrine", "hills", "Lumbini"],
+  ["Pyuthan", "Swargadwari", "pagoda", "hills", "Lumbini"],
+  ["Rolpa", "Jaljala", "terraces", "hills", "Lumbini"],
+  ["Rukum West", "Syarpu Lake", "lake", "hills", "Karnali"],
+  ["Jajarkot", "Jajarkot Durbar", "durbar", "hills", "Karnali"],
+  ["Dailekh", "Dullu's Kirti Khamba", "pillar", "hills", "Karnali"],
+  ["Kalikot", "Pachal Waterfall", "falls", "hills", "Karnali"],
+  ["Jumla", "Chandannath Temple", "pagoda", "hills", "Karnali"],
+  ["Mugu", "Rara Lake", "lake", "high", "Karnali"],
+  ["Humla", "Raling Gompa", "monastery", "high", "Karnali"],
+  ["Bajura", "Badimalika Temple", "shrine", "high", "Sudurpashchim"],
+  ["Achham", "Ramaroshan Lakes", "lake", "hills", "Sudurpashchim"],
+  ["Bajhang", "Surma Sarovar", "lake", "high", "Sudurpashchim"],
+  ["Darchula", "Api Himal", "peak", "high", "Sudurpashchim"],
+  ["Baitadi", "Tripurasundari Temple", "pagoda", "hills", "Sudurpashchim"],
+  ["Doti", "Shaileshwari Temple", "shrine", "hills", "Sudurpashchim"],
+  ["Dadeldhura", "Amargadhi Fort", "fort", "hills", "Sudurpashchim"],
+  ["Kanchanpur", "Shuklaphanta Grasslands", "grove", "plains", "Sudurpashchim"],
+  ["Kailali", "Ghodaghodi Lake", "lake", "plains", "Sudurpashchim"],
+  ["Surkhet", "Kakrebihar", "shikhara", "valley", "Karnali"],
+  ["Salyan", "Khairabang Bhagwati Temple", "shrine", "hills", "Karnali"],
+  ["Dang", "Dharapani Temple", "shikhara", "plains", "Lumbini"],
+  ["Banke", "Bageshwari Temple", "pagoda", "plains", "Lumbini"],
+  ["Bardiya", "Bardiya National Park", "grove", "plains", "Lumbini"],
+].map(([name, landmark, style, terrain, province]) => ({name, landmark, style, terrain, province}));
+
+const makeLandmarks = (() => {
+// Stylized illustrations of Nepal's architecture and natural landmarks.
+function makeLandmarks(ctx, stupa, pagoda) {
+  const images = new Map();
+  function makeIcon(site) {
+    const canvas=document.createElement('canvas');
+    canvas.width=340;canvas.height=240;
+    const paint=canvas.getContext('2d');
+    paint.translate(170,213);paint.scale(1.36,1.36);
+    const variant=[...site.landmark].reduce((seed,c)=>Math.imul(seed,31)+c.charCodeAt(0)>>>0,113);
+    const stone=['#b8a68b','#aeb0a0','#d2ba9b','#d5c6a6'][variant%4];
+    const wall=['#914d39','#ae6c4d','#c38355','#d0ae84'][variant%4];
+    const dark='#243338', gold='#dfb566';
+    const rect=(x,y,w,h,color)=>{paint.fillStyle=color;paint.fillRect(x,y,w,h);};
+    function poly(points,color){
+      paint.beginPath();for(const [x,y] of points)paint.lineTo(x,y);
+      paint.closePath();paint.fillStyle=color;paint.fill();
+    }
+    function oval(x,y,rx,ry,color){
+      paint.beginPath();paint.ellipse(x,y,rx,ry,0,0,Math.PI*2);
+      paint.fillStyle=color;paint.fill();
+    }
+    function roof(y,width,height){
+      poly([[-width,y],[-width*.27,y-height],[width*.27,y-height],[width,y]],'#573a36');
+      poly([[-width,y],[width,y],[width*.86,y+4],[-width*.86,y+4]],gold);
+    }
+    function base(w){
+      rect(-w,-6,2*w,7,'#526458');rect(-w+5,-11,2*w-10,5,stone);
+    }
+    function spire(x,y,w,h){
+      poly([[x-w,y],[x-w*.77,y-h*.49],[x-w*.28,y-h*.88],[x,y-h],
+        [x+w*.28,y-h*.88],[x+w*.77,y-h*.49],[x+w,y]],stone);
+      for(let i=1;i<6;i++)rect(x-w*(1-i*.13),y-i*h/7,w*(2-i*.26),2,gold);
+      oval(x,y-h,3.5,3,gold);
+    }
+    function houses(){
+      for(let i=0;i<5;i++){
+        const x=-98+i*39, y=-18-(variant>>i&7)*3;
+        rect(x,y-29,33,29,i%2?wall:stone);
+        poly([[x-4,y-28],[x+16,y-47],[x+37,y-28]],i%2?'#804c41':'#415461');
+        rect(x+6,y-17,5,7,dark);rect(x+21,y-17,5,7,dark);
+      }
+    }
+    function peak(height=126){
+      const top=-(variant%27)-height;
+      const split=site.landmark==='Machhapuchhre';
+      const shape=[[-115,0],[-83,-33],[-57,-51],[-27,top*.68],[-7,top+10],
+        [7,split?top+29:top],[23,split?top:top+23],[37,top*.65],[58,-60],[109,0]];
+      poly(shape,'#9aafbd');
+      poly([[-57,-51],...shape.slice(3,9),[45,-49],[20,-68],[12,-41],[-4,-76],[-29,-51]],'#eaf0e8');
+      poly([[7,split?top+29:top],[23,split?top:top+23],[37,top*.65],[58,-60],
+        [109,0],[46,-22],[24,-64]],'#687e97');
+    }
+
+    switch(site.style){
+      case 'stupa': stupa(paint,0,0,1.32);break;
+      case 'pagoda':
+        if(site.landmark==='Nyatapola Temple'){
+          base(64);
+          for(let i=0;i<5;i++){
+            const w=50-i*8,y=-18-i*19;
+            rect(-w*.59,y-1,w*1.18,20,wall);
+            rect(-4,y+4,8,10,dark);roof(y,w,12);
+          }
+          rect(-1,-112,2,9,gold);
+        }else{
+          pagoda(paint,0,0,wall,variant%2+2);
+        }
+        break;
+      case 'durbar': {
+        base(75);
+        const seven=site.name==='Nuwakot', tiers=seven?7:3;
+        const height=seven?15:24;
+        rect(seven?-49:-66,-16-tiers*height,seven?98:132,tiers*height,wall);
+        for(let i=0;i<tiers;i++){
+          const y=-15-(i+1)*height;
+          rect(seven?-50:-67,y,seven?100:134,3,stone);
+          for(let j=-2;j<=2;j++){
+            rect(j*17-4,y+6,8,7,dark);
+            rect(j*17-5,y+5,10,2,gold);
+          }
+        }
+        roof(-16-tiers*height,seven?60:76,15);
+        rect(-6,-31,12,20,dark);
+        break;
+      }
+      case 'shikhara':
+        base(65);rect(-39,-45,78,34,wall);spire(-26,-42,18,48);
+        spire(26,-42,18,48);spire(0,-38,25,80);rect(-6,-31,12,20,dark);break;
+      case 'janaki': case 'palace': {
+        const janaki=site.style==='janaki';
+        base(100);rect(-88,-56,176,45,janaki?'#eee2cb':'#cfd7d1');
+        rect(-31,-76,62,65,janaki?'#eee2cb':'#b9cdcf');
+        for(const x of [-75,-50,-25,0,25,50,75]){
+          const y=Math.abs(x)<=25?-46:-39;
+          oval(x,y,6,8,'#42666e');rect(x-6,y,12,19,'#42666e');
+        }
+        if(janaki){for(const x of [-73,-42,0,42,73]){oval(x,x?-57:-82,x?12:22,x?11:15,gold);rect(x-1,x?-73:-102,2,7,gold);}}
+        else{rect(-99,-58,198,5,'#52696f');rect(-39,-78,78,5,'#52696f');}
+        break;
+      }
+      case 'shrine': case 'monastery': case 'sanctuary':
+        base(67);rect(-52,-56,104,45,site.style==='sanctuary'?'#f3ead2':wall);
+        rect(-15,-50,30,39,dark);rect(-44,-44,15,18,'#314f54');rect(29,-44,15,18,'#314f54');
+        if(site.style==='sanctuary'){rect(-58,-61,116,7,'#decca6');rect(70,-80,5,70,stone);}
+        else if(site.style==='monastery'){rect(-58,-60,116,9,'#703e39');rect(-39,-68,78,9,gold);}
+        else{roof(-55,62,24);spire(0,-78,7,16);}
+        break;
+      case 'fort': case 'ruins': {
+        const fort=site.style==='fort';
+        if(site.name==='Okhaldhunga'){
+          oval(0,-14,50,13,'#a4a896');oval(0,-31,50,20,stone);oval(0,-36,34,11,'#52605d');break;
+        }
+        base(95);
+        for(let i=0;i<10;i++){
+          const x=-90+i*18, height=fort?35+(i%4===0?24:0):13+((variant>>i)&7)*3;
+          rect(x,-height-9,17,height,i%2?stone:'#928877');
+          rect(x+2,-height+3,13,1,'#6d6e65');
+        }
+        if(fort){rect(-15,-34,30,25,dark);oval(0,-34,15,13,dark);}
+        break;
+      }
+      case 'pillar':
+        base(38);rect(-10,-111,20,102,stone);rect(-11,-111,6,102,'#d8cbb1');
+        rect(-15,-115,30,7,gold);oval(0,-119,7,5,stone);break;
+      case 'mound': oval(0,-7,86,10,'#4e624f');oval(0,-15,60,24,'#8e9a68');oval(0,-11,54,14,'#9fa26e');break;
+      case 'peak': peak();break;
+      case 'lake': case 'river': {
+        if(site.terrain==='high')peak(80);
+        if(site.style==='lake'){
+          oval(0,-8,103,25,'#32808a');
+          oval(-9,-12,85,14,'#569ea0');
+          oval(-18,-11,59,2,'#b3d1bc');
+          oval(35,-4,42,1.5,'#a0beba');
+        }else{
+          poly([[-102,-9],[-62,-16],[-25,-19],[5,-36],[-22,-44],[22,-51],[49,-44],
+            [25,-36],[39,-22],[15,-8],[-23,4]],'#68a6a9');
+          poly([[-90,-8],[-49,-15],[-19,-13],[9,-20],[-11,-3]],'#b0d1c5');
+        }
+        break;
+      }
+      case 'falls': case 'cave':
+        poly([[-91,0],[-83,-54],[-57,-89],[37,-99],[72,-70],[86,0]],stone);
+        poly([[-70,0],[-60,-61],[-41,-77],[43,-88],[68,-57],[64,0]],'#6d7773');
+        if(site.style==='falls'){
+          poly([[-5,-94],[17,-94],[11,-63],[20,-21],[29,0],[-26,0],[-11,-33]],'#c8e7e5');
+          poly([[1,-93],[9,-91],[2,-52],[10,-6],[-6,-6],[-3,-48]],'#79b2cb');
+          oval(0,0,48,6,'#a4ced0');
+        }else{
+          rect(-37,-40,73,40,dark);oval(0,-40,36,26,dark);rect(-10,-15,20,14,gold);
+        }
+        break;
+      case 'bridge':
+        for(const x of [-91,91])rect(x-4,-71,8,73,stone);
+        paint.strokeStyle='#d7c9a4';paint.lineWidth=3;
+        for(const shift of [-10,8]){
+          paint.beginPath();paint.moveTo(-91,-60+shift);paint.quadraticCurveTo(0,-8+shift,91,-60+shift);paint.stroke();
+        }
+        for(let x=-76;x<=76;x+=12)rect(x,-44-25*(x/91)**2,1.5,18,'#c9bba5');
+        break;
+      case 'grove':
+        oval(0,-5,108,13,'#73935f');
+        for(let i=0;i<13;i++){
+          const x=-95+i*15,y=-13-(variant>>i&7)*6;
+          rect(x-2,y,4,-y,'#71644e');oval(x,y,13,9,'#536e4d');oval(x-4,y-4,10,9,'#8da46b');
+        }
+        break;
+      case 'terraces':
+        for(let i=0;i<6;i++)oval(7+i*4,-9-i*8,100-i*12,19,i%2?'#8da557':'#547951');
+        if(site.name==='Ilam')houses();
+        break;
+      case 'village': houses();break;
+    }
+    return canvas;
+  }
+
+  return (site,w,h,night,alpha) => {
+    if(!site || alpha<=0)return;
+    if(!images.has(site.name))images.set(site.name,makeIcon(site));
+    const icon=images.get(site.name);
+    const width=Math.min(w*.53,h*.32), height=width*icon.height/icon.width;
+    const x=w*(w<h*.68?.69:.75), ground=h*.845;
+    ctx.save();ctx.globalAlpha=alpha*(1-night*.39);
+    ctx.drawImage(icon,x-width/2,ground-height*213/240,width,height);
+    ctx.restore();
+  };
+}
+
+return makeLandmarks;
+})();
+const makeScenery = (() => {
+
+const TAU = Math.PI * 2;
+const mix = (a, b, t) => a + (b - a) * t;
+const color = (a, b, t) => `rgb(${a.map((v, i) => Math.round(mix(v, b[i], t))).join(',')})`;
+function random(seed) {
+  return () => {
+    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+    return seed / 4294967296;
+  };
+}
+const TILE_WIDTH = 1600, TILE_HEIGHT = 500;
+
+function makeLayer() {
+  const canvas = document.createElement('canvas');
+  canvas.width = TILE_WIDTH;
+  canvas.height = TILE_HEIGHT;
+  return canvas;
+}
+
+function polygon(ctx, points, fill) {
+  ctx.beginPath();
+  for (const [x,y] of points) ctx.lineTo(x,y);
+  ctx.closePath();
+  ctx.fillStyle = fill;
+  ctx.fill();
+}
+
+function himalayas() {
+  const canvas = makeLayer();
+  const ctx = canvas.getContext('2d');
+  const rnd = random(791);
+  // Twin summit and steep shoulders evoke Machhapuchhre.
+  const skyline = [
+    [0,285],[41,265],[82,232],[115,241],[150,201],[176,188],
+    [197,145],[213,134],[227,111],[244,145],[252,141],[264,103],
+    [279,131],[295,145],[326,195],[343,198],[377,235],[401,230],
+    [441,207],[471,211],[511,178],[542,164],[562,170],[588,151],
+    [608,162],[630,167],[665,192],[693,195],[727,225],[754,232],
+    [790,210],[822,207],[852,179],[881,168],[917,183],[940,182],
+    [962,207],[994,218],[1020,213],[1063,177],[1092,168],[1120,140],
+    [1149,158],[1164,152],[1188,175],[1209,184],[1245,224],
+    [1280,213],[1300,201],[1327,208],[1351,184],[1394,172],
+    [1428,202],[1453,208],[1490,238],[1537,251],[1600,285]
+  ];
+  const profile = skyline.flatMap(([x,y], index) => {
+    if (!index) return [[x,y]];
+    const [px,py] = skyline[index-1];
+    const edge = [];
+    for(let next=px+6;next<x;next+=6) {
+      edge.push([next,mix(py,y,(next-px)/(x-px))+rnd()*5-2.5]);
+    }
+    return [...edge,[x,y]];
+  });
+  const gradient = ctx.createLinearGradient(0,110,0,410);
+  gradient.addColorStop(0,'#fff0dd');
+  gradient.addColorStop(.29,'#d7e1ea');
+  gradient.addColorStop(.64,'#7896aa');
+  gradient.addColorStop(1,'#546f88');
+  polygon(ctx,[...profile,[TILE_WIDTH,TILE_HEIGHT],[0,TILE_HEIGHT]],gradient);
+  ctx.save();
+  ctx.clip();
+  const faces = [
+    [[227,111],[247,153],[257,169],[277,187],[298,251],[326,312],[274,278],[242,208]],
+    [[264,103],[280,132],[295,145],[346,212],[385,261],[355,249],[327,235],[301,191],[287,171]],
+    [[197,145],[214,182],[210,222],[231,269],[251,313],[205,301],[178,242]],
+    [[588,151],[614,166],[654,185],[700,232],[728,286],[692,276],[638,236],[616,204]],
+    [[881,168],[921,183],[959,208],[985,256],[949,241],[918,218]],
+    [[1120,140],[1150,157],[1170,169],[1195,191],[1238,263],[1195,241],[1155,208]],
+    [[1394,172],[1435,204],[1470,221],[1515,278],[1463,259],[1428,232]]
+  ];
+  faces.forEach((face,i)=>polygon(ctx,face,i%2 ? '#637d99b0' : '#536f90a3'));
+  for(let i=0;i<profile.length-1;i++){
+    const [x,y]=profile[i];
+    const length=12+rnd()*79, drift=rnd()*26;
+    polygon(ctx,[[x,y],[x+3+rnd()*5,y+4],[x+drift+9,y+length],[x+drift,y+length*.72]],
+      i%3===0?'#ffe9d44e':'#526c8a35');
+  }
+  ctx.restore();
+  return canvas;
+}
+
+function stupa(ctx,x,y,scale) {
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.scale(scale,scale);
+  const steps = [[-70,-5,140,8],[-61,-12,122,7],[-51,-18,102,6]];
+  for(const [left,top,width,height] of steps){
+    ctx.fillStyle='#aaac98';
+    ctx.fillRect(left,top,width,height);
+    ctx.fillStyle='#e9dfc5';
+    ctx.fillRect(left,top,width,2);
+  }
+  const dome=ctx.createLinearGradient(-47,-60,42,-10);
+  dome.addColorStop(0,'#fff0ce');dome.addColorStop(.58,'#e4d9bd');dome.addColorStop(1,'#9caba7');
+  ctx.beginPath();
+  ctx.ellipse(0,-18,48,34,0,Math.PI,TAU);
+  ctx.closePath();
+  ctx.fillStyle=dome;ctx.fill();
+  ctx.fillStyle='#b6874c';ctx.fillRect(-15,-57,30,14);
+  ctx.fillStyle='#e5bd64';ctx.fillRect(-14,-56,24,11);
+  for(const x of [-8,5]){
+    ctx.fillStyle='#34425a';ctx.beginPath();ctx.ellipse(x,-51,4,1.65,0,0,TAU);ctx.fill();
+    ctx.fillStyle='#242e3e';ctx.fillRect(x-1,-52,2,2);
+  }
+  ctx.fillStyle='#9f5844';ctx.fillRect(-2,-48,3,3);
+  for(let i=0;i<9;i++){
+    const width=27-i*2.65;
+    ctx.fillStyle=i%2?'#b27634':'#ebbc58';
+    ctx.fillRect(-width/2,-59-i*2.7,width,3);
+  }
+  ctx.fillStyle='#e5ac52';ctx.fillRect(-1,-91,2,10);
+  ctx.beginPath();ctx.arc(0,-91,3,0,TAU);ctx.fill();
+  const flags=['#385e99','#e9e3d2','#9f494d','#577458','#dbb254'];
+  for(const side of [-1,1]){
+    const point=t=>[side*116*t,-86+67*t+8*Math.sin(Math.PI*t)];
+    ctx.beginPath();
+    for(let i=0;i<=24;i++)ctx.lineTo(...point(i/24));
+    ctx.strokeStyle='#785d4d';ctx.lineWidth=.8;ctx.stroke();
+    for(let i=1;i<11;i++){
+      const [fx,fy]=point(i/11);
+      polygon(ctx,[[fx,fy],[fx+side*6,fy+2],[fx+side*4,fy+9],[fx,fy+7]],flags[(i+(side+1)*2)%flags.length]);
+    }
+  }
+  ctx.restore();
+}
+
+function pagoda(ctx,x,y,wall="#8e5143",tiers=3) {
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.fillStyle='#9b8d79';ctx.fillRect(-49,-7,98,8);
+  ctx.fillStyle='#c4aa89';ctx.fillRect(-41,-13,82,6);
+  for(const [half,roof] of [[38,-29],[29,-48],[21,-66]].slice(0,tiers)){
+    ctx.fillStyle=wall;ctx.fillRect(-half*.58,roof,half*1.16,17);
+    for(const offset of [-.32,0,.32]){
+      ctx.fillStyle='#322f33';ctx.fillRect(half*offset-2,roof+3,4,10);
+    }
+    polygon(ctx,[[-half,roof+2],[-half*.64,roof-3],[-half*.33,roof-15],
+      [half*.33,roof-15],[half*.64,roof-3],[half,roof+2]],'#383d44');
+    polygon(ctx,[[-half,roof+2],[-half*.73,roof-1],[half*.73,roof-1],[half,roof+2]],'#b28b52');
+  }
+  ctx.fillStyle='#ba945a';ctx.fillRect(-1,-31-tiers*19,2,10);
+  ctx.restore();
+}
+
+function hill(index) {
+  const canvas = makeLayer();
+  const ctx = canvas.getContext('2d');
+  const rnd = random(612+index);
+  const palette = [['#91a7a1','#586f7b'],['#7e9871','#324f55'],['#69865a','#183936']][index];
+  const crest = x => {
+    const a=x/TILE_WIDTH*TAU;
+    return [323,371,445][index] - [26,29,26][index]*Math.cos(a*(index+2)+[.6,2,-1.03][index])
+      + 12*Math.sin(a*(index+4)) + 3*Math.sin(a*16);
+  };
+  const points = Array.from({length:201},(_,i)=>[i*8,crest(i*8)]);
+  const gradient=ctx.createLinearGradient(0,290,0,TILE_HEIGHT);
+  gradient.addColorStop(0,palette[0]);gradient.addColorStop(1,palette[1]);
+  polygon(ctx,[...points,[TILE_WIDTH,TILE_HEIGHT],[0,TILE_HEIGHT]],gradient);
+  ctx.save();ctx.clip();
+  if(index>0){
+    for(let terrace=5;terrace<106;terrace+=index===2?8:11){
+      ctx.beginPath();
+      for(let x=0;x<=TILE_WIDTH;x+=8){
+        const depth=Math.min(1,terrace/65);
+        const curve=mix(crest(x), 411+12*Math.sin(x/TILE_WIDTH*TAU*3),depth*.42);
+        ctx.lineTo(x,curve+terrace+Math.sin(x/TILE_WIDTH*TAU*8+terrace*.035)*4);
+      }
+      ctx.lineWidth=index===2?2:1.3;ctx.strokeStyle=index===2?'#a9aa6e77':'#abbb9170';ctx.stroke();
+      ctx.translate(0,2);ctx.lineWidth=2;ctx.strokeStyle='#1a3b3b65';ctx.stroke();ctx.translate(0,-2);
+    }
+  }
+  for(let i=0;i<4900;i++){
+    const x=rnd()*TILE_WIDTH,y=280+rnd()*235;
+    ctx.fillStyle=i%2?'#d9e5a522':'#12353a26';
+    ctx.fillRect(x,y,.7+rnd()*3,.7+rnd()*2);
+  }
+  ctx.restore();
+  if(index===2){
+    for(let i=0;i<156;i++){
+      const x=rnd()*TILE_WIDTH;
+      const y=crest(x)+rnd()*27, height=2+rnd()*11;
+      polygon(ctx,[[x-height*.28,y],[x,y-height],[x+height*.33,y]],i%2?'#25473f':'#38563e');
+    }
+  }
+  return canvas;
+}
+
+function tintLayer(canvas) {
+  const night = makeLayer();
+  const ctx = night.getContext('2d');
+  ctx.drawImage(canvas,0,0);
+  ctx.globalCompositeOperation='source-atop';
+  ctx.fillStyle='#111c47ad';
+  ctx.fillRect(0,0,TILE_WIDTH,TILE_HEIGHT);
+  return night;
+}
+const elevations = {
+  valley: [.64,.79,.75,.88],
+  hills: [.73,.88,1,1],
+  high: [1.10,1.02,.72,.68],
+  plains: [.12,.27,.39,.49],
+  dry: [.94,.86,.73,.76]
+};
+
+function makeScenery(ctx) {
+  const drawLandmark=makeLandmarks(ctx,stupa,pagoda);
+  const layers = [himalayas(),hill(0),hill(1),hill(2)].map(day=>({day,night:tintLayer(day)}));
+  const rnd = random(42);
+  const stars = Array.from({length:105}, () => [rnd(), rnd()*.7, .25+rnd()*1.4, rnd()]);
+  const clouds = Array.from({length:22}, () => [rnd(), .09+rnd()*.57, 50+rnd()*170, rnd()]);
+  const cloud = document.createElement('canvas');
+  cloud.width = 320; cloud.height = 100;
+  const paint = cloud.getContext('2d');
+  for(let i = 0; i < 30; i++){
+    const x = 52+rnd()*215, y = 30+rnd()*45, r = 12+rnd()*38;
+    const glow = paint.createRadialGradient(x,y,0,x,y,r);
+    glow.addColorStop(0,'#fff1e593'); glow.addColorStop(1,'#fff1e500');
+    paint.fillStyle = glow; paint.fillRect(x-r,y-r,r*2,r*2);
+  }
+  return (w,h,t,travel,night,site,previous,transition=1) => {
+    const sky = ctx.createLinearGradient(0,0,0,h);
+    sky.addColorStop(0,color([23,63,93],[8,13,36],night));
+    sky.addColorStop(.48,color([128,119,146],[25,39,73],night));
+    sky.addColorStop(.75,color([246,155,115],[58,63,101],night));
+    sky.addColorStop(1,color([255,213,151],[83,101,128],night));
+    ctx.fillStyle=sky;ctx.fillRect(0,0,w,h);
+    for(const [x,y,r,p] of stars){
+      ctx.globalAlpha=night*(.45+.35*Math.sin(t*1.6+p*TAU));
+      ctx.fillStyle='#e4edff';ctx.beginPath();ctx.arc(x*w,y*h,r,0,TAU);ctx.fill();
+    }
+    ctx.globalAlpha=1;
+    const sunX=w*.77, sunY=h*.44, radius=Math.min(h,w)*.068;
+    const halo=ctx.createRadialGradient(sunX,sunY,radius*.5,sunX,sunY,radius*4.4);
+    halo.addColorStop(0,color([255,192,124],[129,179,248],night));
+    halo.addColorStop(.28,night > .5 ? '#84b3ef42' : '#ffb87863');
+    halo.addColorStop(1,'#ffba7800');
+    ctx.globalAlpha=.76-night*.25;ctx.fillStyle=halo;ctx.fillRect(sunX-radius*4.4,sunY-radius*4.4,radius*8.8,radius*8.8);ctx.globalAlpha=1;
+    ctx.fillStyle=color([255,233,177],[216,232,255],night);ctx.beginPath();ctx.arc(sunX,sunY,radius,0,TAU);ctx.fill();
+    for(const [x,y,s,p] of clouds){
+      const span=w+s*2, cx=((x*span-t*(5+p*9)-travel*.013)%span+span)%span-s;
+      ctx.globalAlpha=(.26+p*.43)*(1-night*.6);
+      ctx.drawImage(cloud,cx,y*h,s*1.7,s*.44);
+    }
+    ctx.globalAlpha=1;
+    const from=elevations[previous?.terrain || site.terrain], to=elevations[site.terrain];
+    for(let i=0;i<layers.length;i++){
+      const elevation=mix(from[i],to[i],transition), top=h*(1-elevation);
+      const span=Math.max(w*1.14,h*1.68);
+      const offset=-(travel*[.035,.075,.14,.24][i]%span);
+      for(let x=offset;x<w;x+=span){
+        ctx.drawImage(layers[i].day,x,top,span+1,h*elevation);
+        if(night>.015){
+          ctx.globalAlpha=night;
+          ctx.drawImage(layers[i].night,x,top,span+1,h*elevation);
+          ctx.globalAlpha=1;
+        }
+      }
+    }
+    drawLandmark(previous,w,h,night,1-transition);
+    drawLandmark(site,w,h,night,transition);
+    const vignette=ctx.createRadialGradient(w*.5,h*.45,Math.min(w,h)*.24,w*.5,h*.49,Math.hypot(w,h)*.58);
+    vignette.addColorStop(0,'#09142600');vignette.addColorStop(1,'#050e2092');
+    ctx.fillStyle=vignette;ctx.fillRect(0,0,w,h);
+  };
+}
+
+return makeScenery;
+})();
+const makeAudio = (() => {
+function makeAudio(settings) {
+  let context, music, effects, next, note = 0;
+  const phrase = [57,64,69,72,69,64,55,62,67,71,67,62,53,60,65,69,65,60,55,62,67,74,67,62];
+  const frequency = pitch => 440 * 2 ** ((pitch-69)/12);
+  function tone(bus, start, from, to, length, level, type = 'sine') {
+    const oscillator=context.createOscillator(), envelope=context.createGain();
+    oscillator.type=type;
+    oscillator.frequency.setValueAtTime(from,start);
+    oscillator.frequency.exponentialRampToValueAtTime(to,start+length);
+    envelope.gain.setValueAtTime(.0001,start);
+    envelope.gain.exponentialRampToValueAtTime(level,start+.012);
+    envelope.gain.exponentialRampToValueAtTime(.0001,start+length);
+    oscillator.connect(envelope).connect(bus);
+    oscillator.start(start);oscillator.stop(start+length+.01);
+  }
+  function refresh(){
+    if(!context)return;
+    music.gain.setTargetAtTime(settings.muted?0:settings.music/100,context.currentTime,.04);
+    effects.gain.setTargetAtTime(settings.muted?0:settings.effects/100,context.currentTime,.04);
+  }
+  function schedule(){
+    if(context.state!=='running')return;
+    if(next<context.currentTime)next=context.currentTime+.03;
+    while(next<context.currentTime+.26){
+      const hz=frequency(phrase[note%phrase.length]);
+      tone(music,next,hz,hz,.47,.055,'triangle');
+      if(note%6===0)tone(music,next,hz/2,hz/2,1.55,.12);
+      next+=.27;note++;
+    }
+  }
+  return {
+    refresh,
+    unlock(){
+      if(!context){
+        const Audio=window.AudioContext || window.webkitAudioContext;
+        if(!Audio)return;
+        context=new Audio();music=context.createGain();effects=context.createGain();
+        music.connect(context.destination);effects.connect(context.destination);
+        next=context.currentTime;setInterval(schedule,110);refresh();
+      }
+      if(context.state==='suspended')context.resume().catch(()=>{});
+    },
+    play(name){
+      if(!effects || context.state!=='running')return;
+      const t=context.currentTime;
+      const sounds={lift:[[270,490,.13,.13,'triangle']],gate:[[520,740,.15,.15],[780,1030,.21,.1]],coin:[[880,1200,.13,.16],[1320,1600,.21,.1]],shield:[[420,1000,.35,.18,'triangle']],hit:[[130,42,.44,.31,'triangle']],record:[[522,524,.28,.17],[659,661,.3,.16],[784,786,.55,.16]]};
+      sounds[name].forEach(([a,b,d,v,type],i)=>tone(effects,t+i*.09,a,b,d,v,type));
+    }
+  };
+}
+
+return makeAudio;
+})();
+const makeProfile = (() => {
+function makeProfile(saved, onSave) {
+  const form = document.getElementById('pilot-form');
+  const name = document.getElementById('pilot-name');
+  const file = document.getElementById('pilot-photo');
+  const preview = document.getElementById('pilot-preview');
+  const placeholder = document.getElementById('pilot-placeholder');
+  const adjust = document.getElementById('pilot-adjust');
+  const remove = document.getElementById('pilot-remove');
+  const status = document.getElementById('pilot-status');
+  const submit = form.querySelector('button[type=submit]');
+  const controls = ['zoom', 'horizontal', 'vertical'].map(id => document.getElementById('pilot-' + id));
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 224;
+  const ctx = canvas.getContext('2d');
+  let profile = saved || {name: '', photo: ''};
+  let source = null, photo = '', revision = 0;
+
+  function showPhoto(value) {
+    photo = value;
+    if (photo) preview.src = photo;
+    else preview.removeAttribute('src');
+    preview.hidden = !photo;
+    placeholder.hidden = !!photo;
+    remove.hidden = !photo;
+  }
+
+  function crop() {
+    const size = canvas.width;
+    const [zoom, horizontal, vertical] = controls.map(control => Number(control.value));
+    const scale = size / Math.min(source.naturalWidth, source.naturalHeight) * zoom / 100;
+    const width = source.naturalWidth * scale;
+    const height = source.naturalHeight * scale;
+    ctx.clearRect(0, 0, size, size);
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(size / 2, size / 2, size / 2 - 1, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.drawImage(source, (size - width) * horizontal / 100, (size - height) * vertical / 100, width, height);
+    ctx.restore();
+    showPhoto(canvas.toDataURL('image/png'));
+  }
+
+  function open() {
+    revision++;
+    name.value = profile.name;
+    file.value = '';
+    source = null;
+    adjust.hidden = true;
+    status.textContent = '';
+    submit.disabled = false;
+    showPhoto(profile.photo);
+  }
+
+  file.addEventListener('change', async () => {
+    const selected = file.files[0];
+    if (!selected) return;
+    const id = ++revision;
+    const url = URL.createObjectURL(selected);
+    const image = new Image();
+    submit.disabled = true;
+    status.textContent = 'Opening photo…';
+    try {
+      image.src = url;
+      await image.decode();
+      if (id !== revision) return;
+      source = image;
+      controls.forEach(control => { control.value = control.defaultValue; });
+      crop();
+      adjust.hidden = false;
+      status.textContent = 'Frame your face with the crop controls.';
+    } catch {
+      if (id === revision) status.textContent = 'This photo could not be opened. Try a JPEG, PNG, or WebP.';
+    } finally {
+      URL.revokeObjectURL(url);
+      if (id === revision) submit.disabled = false;
+    }
+  });
+
+  for (const control of controls) control.addEventListener('input', crop);
+  remove.addEventListener('click', () => {
+    revision++;
+    source = null;
+    file.value = '';
+    adjust.hidden = true;
+    status.textContent = '';
+    submit.disabled = false;
+    showPhoto('');
+  });
+  name.addEventListener('input', () => name.setCustomValidity(''));
+  form.addEventListener('submit', event => {
+    event.preventDefault();
+    const displayName = name.value.trim();
+    if (!displayName) {
+      name.setCustomValidity('Enter a pilot name.');
+      name.reportValidity();
+      return;
+    }
+    profile = {name: displayName, photo};
+    onSave(profile);
+  });
+  open();
+  return {open};
+}
+
+return makeProfile;
+})();
+
+const byId = id => document.getElementById(id);
+const canvas = byId('scene'), ctx = canvas.getContext('2d', {alpha:false});
+const scenery = makeScenery(ctx);
+const portrait = new Image();
+const TAU = Math.PI*2;
+const HEIGHT = 720, STEP = 1/120;
+const MODES = {
+  Easy: {speed:184,gap:274,gravity:805,lift:300,spacing:340},
+  Normal: {speed:224,gap:230,gravity:930,lift:326,spacing:325},
+  Hard: {speed:264,gap:194,gravity:1030,lift:347,spacing:310},
+  Extreme: {speed:318,gap:164,gravity:1150,lift:365,spacing:305}
+};
+const clamp = (n,min,max) => Math.max(min,Math.min(max,n));
+const rnd = (min,max) => min+Math.random()*(max-min);
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+const storageKey = 'skywake.arcade.v1';
+let saved;
+try {saved=JSON.parse(localStorage.getItem(storageKey)) || {};} catch {saved={};}
+const settings={difficulty:'Normal',music:42,effects:70,muted:false,...saved.settings};
+if(!Object.hasOwn(MODES,settings.difficulty))settings.difficulty='Normal';
+const records=Array.isArray(saved.records)?saved.records:[];
+const audio=makeAudio(settings);
+const gatesPerDistrict=3;
+const lastDistrict=districts.length-1;
+let unlocked=Number.isInteger(saved.unlocked)?Math.max(0,Math.min(lastDistrict,saved.unlocked)):0;
+let tourComplete=saved.tourComplete===true, completedFlight=false;
+let district=unlocked, previousDistrict=null, entryTime=0, districtGates=0;
+let profile=saved.profile;
+const profileEditor=makeProfile(profile, newProfile=>{
+  profile=newProfile;applyProfile();save();audio.unlock();show('home');
+});
+let width=960, scale=1, renderScale=1, state='profile', focusState='home';
+let lastFrame=0, accumulator=0, ambient=0, menuTravel=0, shake=0;
+let y=HEIGHT*.48, velocity=0, tilt=0, distance=0, elapsed=0, score=0, coins=0;
+let shield=0, grace=0, best=0, center=HEIGHT*.52, nextGate=0;
+let gates=[], particles=[];
+const xPilot=()=>clamp(width*.27,76,300);
+const currentMode=()=>MODES[settings.difficulty];
+const recordForMode=()=>Math.max(0,...records.filter(record=>record.mode===settings.difficulty).map(record=>record.score));
+function applyProfile(){
+  if(profile?.photo)portrait.src=profile.photo;
+  else portrait.removeAttribute('src');
+  byId('pilot-greeting').textContent=profile?.name ? `Ready to fly, ${profile.name}?` : '';
+}
+function save(){
+  try {localStorage.setItem(storageKey,JSON.stringify({settings,records,profile,unlocked,tourComplete}));} catch {}
+}
+function resize(){
+  const oldWidth=width;
+  const rect=canvas.getBoundingClientRect();
+  if(!rect.width || !rect.height)return;
+  scale=rect.height/HEIGHT;
+  width=rect.width/scale;
+  const dpr=Math.min(window.devicePixelRatio || 1,2);
+  renderScale=scale*dpr;
+  canvas.width=Math.round(rect.width*dpr);canvas.height=Math.round(rect.height*dpr);
+  if(gates.length){
+    const oldX=clamp(oldWidth*.27,76,300), delta=xPilot()-oldX;
+    for(const gate of gates)gate.x+=delta;
+    nextGate+=delta;
+  }
+}
+window.addEventListener('resize',resize);
+resize();
+
+const screens=['profile','home','settings','leaderboard','help','route','paused','over'];
+function show(next, moveFocus=true){
+  state=next;
+  for(const screen of screens)byId(screen).hidden=screen!==next;
+  byId('hud').hidden=!['ready','running'].includes(next);
+  byId('pause').hidden=!['ready','running','paused'].includes(next);
+  byId('pause').textContent=next==='paused'?'▶':'Ⅱ';
+  byId('pause').setAttribute('aria-label',next==='paused'?'Resume':'Pause');
+  byId('cue').hidden=next!=='ready';
+  byId('district-display').hidden=!['ready','running'].includes(next);
+  if(next==='home')updateTourMenu();
+  if(moveFocus && next==='profile'){
+    byId('pilot-name').focus({preventScroll:true});
+  }else if(moveFocus && screens.includes(next)){
+    byId(next).querySelector('button').focus({preventScroll:true});
+  } else if(moveFocus) {
+    document.activeElement?.blur();
+  }
+}
+function updateHUD(){
+  byId('score').textContent=score;byId('best').textContent=Math.max(score,best);
+  byId('coins').textContent=coins;byId('power').hidden=shield<=0;
+  byId('shield').textContent=`${Math.ceil(shield)}s`;
+}
+function updateTourMenu(){
+  byId('play-label').textContent=tourComplete?'Replay tour':unlocked?'Continue tour':'Play';
+  byId('tour-progress').textContent=`${unlocked+1} of ${districts.length} districts visited`;
+}
+function enterDistrict(index, crossfade=false){
+  previousDistrict=crossfade?districts[district]:null;
+  district=index;
+  entryTime=elapsed;
+  districtGates=0;
+  const site=districts[district];
+  byId('district-welcome').textContent=`Welcome to ${site.name}`;
+  byId('district-route-count').textContent=`${site.province} · District ${district+1} of ${districts.length}`;
+  byId('district-landmark').textContent=site.landmark;
+  byId('district-banner').classList.remove('settled');
+  byId('district-landmark').style.opacity=crossfade?'0':'1';
+  if(district>unlocked){unlocked=district;save();}
+}
+function start(index=tourComplete?0:unlocked){
+  completedFlight=false;
+  y=HEIGHT*.48;velocity=0;tilt=0;distance=0;elapsed=0;score=0;coins=0;
+  shield=0;grace=0;center=HEIGHT*.49;nextGate=xPilot()+326;
+  shake=0;gates=[];particles=[];best=recordForMode();
+  enterDistrict(index);updateHUD();show('ready');
+}
+function burst(x,y,color,count,force=135){
+  for(let i=0;i<count && particles.length<260;i++){
+    const angle=rnd(0,TAU), speed=rnd(force*.25,force), life=rnd(.22,.75);
+    particles.push({x,y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,life,max:life,color,size:rnd(1.5,4.5)});
+  }
+}
+function lift(){
+  if(state==='ready')show('running');
+  if(state!=='running')return;
+  audio.unlock();audio.play('lift');
+  velocity=-currentMode().lift;
+  burst(xPilot()-18,y+13,'#ffc883',9,100);
+}
+function togglePause(){
+  if(state==='paused'){show(focusState);return;}
+  if(['ready','running'].includes(state)){focusState=state;show('paused');}
+}
+function fillStats(items){
+  byId('stats').replaceChildren(...items.map(([label,value])=>{
+    const block=document.createElement('div'), small=document.createElement('small'), strong=document.createElement('b');
+    small.textContent=label;strong.textContent=value;block.append(small,strong);return block;
+  }));
+}
+function finish(completed=false){
+  completedFlight=completed;
+  const record=score>best;
+  if(completed){
+    tourComplete=true;save();
+  }else{
+    shake=reducedMotion.matches?0:.24;
+    burst(xPilot(),y,'#ffb47a',30,240);audio.play('hit');
+  }
+  if(score || coins){
+    records.push({name:profile.name,mode:settings.difficulty,score,coins});
+    records.sort((a,b)=>b.score-a.score || b.coins-a.coins);
+    for(const mode of Object.keys(MODES)){
+      const indices=records.map((entry,i)=>entry.mode===mode?i:-1).filter(i=>i>=0);
+      for(const i of indices.slice(10).reverse())records.splice(i,1);
+    }
+    save();
+  }
+  byId('result-label').textContent=completed?'NEPAL TOUR COMPLETE':record?'NEW HIGH SCORE':'FLIGHT COMPLETE';
+  byId('result-district').textContent=completed?`All ${districts.length} districts visited`:`Checkpoint · ${districts[district].name}`;
+  byId('retry').textContent=completed?'Replay tour':'Try Again';
+  if(record || completed){
+    audio.play('record');
+    for(const color of ['#ffc882','#8df3f1','#f7a4bf','#ffffcf']){
+      burst(width*.23,HEIGHT*.42,color,23,375);
+      burst(width*.77,HEIGHT*.42,color,23,375);
+    }
+  }
+  fillStats([['SCORE',score],['BEST',Math.max(score,best)],['COINS',coins],['TIME',`${Math.floor(elapsed)}s`]]);
+  show('over');
+}
+function leaderboard(){
+  const container=byId('records');
+  container.replaceChildren();
+  const ranked=records.slice(0,8);
+  if(!ranked.length){container.textContent='Complete a scoring flight to set a record.';return;}
+  ranked.forEach((entry,index)=>{
+    const row=document.createElement('div');row.className='record';
+    for(const label of [`${index+1}. ${entry.name || 'Pilot'} · ${entry.mode}`,`${entry.score} pts`,`${entry.coins} coins`]){
+      const cell=document.createElement('span');cell.textContent=label;row.append(cell);
+    }
+    container.append(row);
+  });
+}
+function openRoute(){
+  byId('route-progress').textContent=tourComplete?'Nepal tour complete':`Districts visited: ${unlocked+1} of ${districts.length}`;
+  const entries=districts.map((site,index)=>{
+    const item=document.createElement('li');
+    const name=document.createElement('span');
+    const landmark=document.createElement('small');
+    name.textContent=site.name;landmark.textContent=site.landmark;
+    const destination=document.createElement(index<=unlocked?'button':'div');
+    destination.className='route-stop';
+    if(index<=unlocked){
+      destination.type='button';
+      destination.dataset.action='district';
+      destination.dataset.district=index;
+    }else destination.classList.add('locked');
+    destination.append(name,landmark);item.append(destination);return item;
+  });
+  byId('route-list').replaceChildren(...entries);
+}
+function gateAt(x){
+  const mode=currentMode(), challenge=Math.min(score,32);
+  const gap=mode.gap-challenge*1.22;
+  center=clamp(center+rnd(-114,114),gap/2+87,HEIGHT-gap/2-83);
+  const ordinal=gates.length ? gates.at(-1).ordinal+1 : 1;
+  gates.push({x,top:center-gap/2,bottom:center+gap/2,width:64,ordinal,
+    item:ordinal%5===3?'shield':'coin', itemY:center+rnd(-gap*.16,gap*.16), cleared:false, hit:false});
+}
+function hitsRect(px,py,r,x,top,w,bottom){
+  const dx=px-clamp(px,x,x+w),dy=py-clamp(py,top,bottom);
+  return dx*dx+dy*dy<r*r;
+}
+function update(dt){
+  elapsed+=dt;
+  const mode=currentMode(), speed=mode.speed+Math.min(score,40)*2.2;
+  const advance=speed*dt;
+  distance+=advance;
+  velocity=Math.min(620,velocity+mode.gravity*dt);y+=velocity*dt;
+  tilt+=(clamp(velocity/520,-.51,1.04)-tilt)*Math.min(1,dt*9);
+  const before=Math.ceil(shield);
+  shield=Math.max(0,shield-dt);grace=Math.max(0,grace-dt);
+  if(before!==Math.ceil(shield))updateHUD();
+  for(const gate of gates)gate.x-=advance;
+  nextGate-=advance;
+  const lead=Math.max(width+80,xPilot()+455);
+  while(nextGate<lead){
+    gateAt(nextGate);
+    nextGate+=mode.spacing+rnd(-17,30)+Math.min(score,40)*1.15;
+  }
+  const px=xPilot(), radius=19;
+  if(y<radius || y>HEIGHT-radius){y=clamp(y,radius,HEIGHT-radius);finish();return;}
+  for(const gate of gates){
+    const cx=gate.x+gate.width/2;
+    if(gate.item && Math.hypot(px-cx,y-gate.itemY)<radius+14){
+      if(gate.item==='coin'){coins++;audio.play('coin');burst(cx,gate.itemY,'#ffcf73',22);}
+      else{shield=6;audio.play('shield');burst(cx,gate.itemY,'#7fffe7',26);}
+      gate.item=null;updateHUD();
+    }
+    const collided=hitsRect(px,y,radius,gate.x,0,gate.width,gate.top)
+      || hitsRect(px,y,radius,gate.x,gate.bottom,gate.width,HEIGHT);
+    if(!gate.hit && grace<=0 && collided){
+      if(shield<=0){finish();return;}
+      shield=0;grace=.63;gate.hit=true;updateHUD();audio.play('shield');
+      burst(px,y,'#9afcec',30,220);
+    }
+    if(!gate.cleared && gate.x+gate.width<px-radius){
+      gate.cleared=true;score++;updateHUD();audio.play('gate');
+      burst(px+10,y,'#fff4be',13);
+      if(++districtGates===gatesPerDistrict){
+        if(district===lastDistrict){finish(true);return;}
+        enterDistrict(district+1,true);
+      }
+    }
+  }
+  gates=gates.filter(gate=>gate.x+gate.width>-25);
+}
+function gateColumn(x,edge,w,top,t,hit){
+  const from=top?0:edge, h=top?edge:HEIGHT-edge;
+  const trim=top?edge-15:edge;
+  ctx.globalAlpha=hit?.57:1;
+  const metal=ctx.createLinearGradient(x,0,x+w,0);
+  metal.addColorStop(0,'#0b2433');metal.addColorStop(.1,'#3d6471');
+  metal.addColorStop(.22,'#203b4d');metal.addColorStop(.68,'#122a3a');
+  metal.addColorStop(.86,'#385366');metal.addColorStop(1,'#0a1c2c');
+  ctx.fillStyle=metal;ctx.fillRect(x,from,w,h);
+  ctx.fillStyle='#98c4c54a';ctx.fillRect(x+8,from,2,h);
+  ctx.fillStyle='#071d2b';ctx.fillRect(x+w-10,from,3,h);
+  for(let iy=from+23;iy<from+h-19;iy+=35){
+    ctx.fillStyle='#9ec0be28';ctx.fillRect(x+13,iy,w-26,1);
+    ctx.fillStyle='#050f1a';ctx.fillRect(x+18,iy+8,w-36,4);
+    ctx.fillStyle='#65bcb160';ctx.fillRect(x+19,iy+8,6,2);
+  }
+  ctx.fillStyle='#1a3240';ctx.fillRect(x,trim,w,15);
+  ctx.fillStyle='#517483';ctx.fillRect(x,trim,w,2);
+  ctx.fillStyle='#151f2c';ctx.fillRect(x+7,trim+4,w-14,7);
+  ctx.fillStyle=`rgba(121,255,225,${.72+.23*Math.sin(t*3+x*.016)})`;
+  ctx.shadowBlur=9;ctx.shadowColor='#59ffe2';
+  ctx.fillRect(x+13,trim+6,w-26,3);
+  ctx.shadowBlur=0;ctx.globalAlpha=1;
+}
+function drawItem(gate,t){
+  const x=gate.x+gate.width/2, y=gate.itemY+Math.sin(t*4+gate.ordinal)*3;
+  ctx.save();ctx.translate(x,y);
+  if(gate.item==='coin'){
+    ctx.scale(.55+.45*Math.abs(Math.cos(t*3+gate.ordinal)),1);
+    const gold=ctx.createLinearGradient(-9,-11,8,13);
+    gold.addColorStop(0,'#fff8bd');gold.addColorStop(.5,'#f9b34c');gold.addColorStop(1,'#ad601d');
+    ctx.shadowBlur=16;ctx.shadowColor='#ffc563';ctx.fillStyle=gold;
+    ctx.beginPath();ctx.arc(0,0,13,0,TAU);ctx.fill();ctx.shadowBlur=0;
+    ctx.strokeStyle='#8e561b';ctx.lineWidth=1.4;ctx.beginPath();ctx.arc(0,0,9,0,TAU);ctx.stroke();
+    ctx.fillStyle='#fff1a6';ctx.fillRect(-1.5,-6,3,12);
+  }else{
+    ctx.rotate(Math.sin(t*2)*.28);ctx.shadowBlur=17;ctx.shadowColor='#62ffe7';
+    ctx.fillStyle='#b8fff0';ctx.strokeStyle='#39c6c8';ctx.lineWidth=3;
+    ctx.beginPath();ctx.moveTo(0,-16);ctx.lineTo(13,-9);ctx.lineTo(11,6);
+    ctx.quadraticCurveTo(8,13,0,17);ctx.quadraticCurveTo(-8,13,-11,6);
+    ctx.lineTo(-13,-9);ctx.closePath();ctx.fill();ctx.stroke();
+  }
+  ctx.restore();
+}
+function drawPilot(x,y,angle,size,t){
+  ctx.save();ctx.translate(x,y);ctx.rotate(angle);
+  if(shield>0 || grace>0){
+    ctx.strokeStyle=`rgba(139,255,240,${.59+.3*Math.sin(t*7)})`;
+    ctx.fillStyle='#67ffdf20';ctx.shadowBlur=15;ctx.shadowColor='#7cffeb';ctx.lineWidth=2;
+    ctx.beginPath();ctx.arc(0,0,size*.59,0,TAU);ctx.fill();ctx.stroke();
+  }
+  ctx.shadowBlur=14;ctx.shadowOffsetY=5;ctx.shadowColor='#071728a6';
+  if(portrait.complete && portrait.naturalWidth){
+    const imageWidth=size*portrait.naturalWidth/portrait.naturalHeight;
+    ctx.drawImage(portrait,-imageWidth/2,-size/2,imageWidth,size);
+  }else{
+    ctx.fillStyle='#ffcf84';ctx.beginPath();ctx.ellipse(0,0,size*.51,size*.25,0,0,TAU);ctx.fill();
+    ctx.fillStyle='#32788c';ctx.beginPath();ctx.ellipse(4,-5,size*.22,size*.16,0,0,TAU);ctx.fill();
+  }
+  ctx.restore();
+}
+let lastPhase='';
+function render(){
+  ctx.setTransform(renderScale,0,0,renderScale,0,0);
+  const inFlight=['ready','running','paused','over'].includes(state);
+  const t=ambient, night=inFlight?(1-Math.cos(elapsed*Math.PI/34))/2:0;
+  const phase=night>.67?'STARLIGHT':night>.18?'TWILIGHT':'GOLDEN HOUR';
+  if(phase!==lastPhase){byId('phase').textContent=phase;lastPhase=phase;}
+  const age=elapsed-entryTime;
+  const transition=!previousDistrict||reducedMotion.matches?1:clamp(age/1.6,0,1);
+  if(inFlight && age>2.8)byId('district-banner').classList.add('settled');
+  if(inFlight && previousDistrict){
+    byId('district-landmark').style.opacity=String(transition);
+    if(transition===1)previousDistrict=null;
+  }
+  scenery(width,HEIGHT,t,inFlight?distance:menuTravel,night,
+    districts[inFlight?district:unlocked],inFlight?previousDistrict:null,transition);
+  ctx.save();
+  if(shake>0)ctx.translate(rnd(-18,18)*shake,rnd(-14,14)*shake);
+  if(inFlight){
+    for(const gate of gates){
+      if(gate.x>width+20)continue;
+      gateColumn(gate.x,gate.top,gate.width,true,t,gate.hit);
+      gateColumn(gate.x,gate.bottom,gate.width,false,t,gate.hit);
+      if(gate.item)drawItem(gate,t);
+    }
+    if(state!=='over')drawPilot(xPilot(),y+(state==='ready'?Math.sin(t*3)*7:0),tilt,59,t);
+  }else if(state==='home'){
+    const narrow=width<590, short=canvas.clientHeight<530;
+    if(!short)drawPilot(narrow?width*.5:width*.78,narrow?HEIGHT*.20:HEIGHT*.51+Math.sin(t*2.4)*9,-.12+Math.sin(t*1.7)*.09,narrow?71:108,t);
+  }
+  for(const p of particles){
+    ctx.globalAlpha=clamp(p.life/p.max,0,1);ctx.fillStyle=p.color;
+    ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,TAU);ctx.fill();
+  }
+  ctx.globalAlpha=1;ctx.restore();
+}
+function frame(now){
+  const dt=lastFrame?Math.min((now-lastFrame)/1000,.07):0;lastFrame=now;
+  if(state!=='paused'){
+    ambient+=reducedMotion.matches && !['ready','running'].includes(state)?0:dt;
+    menuTravel+=dt*49;shake=Math.max(0,shake-dt);
+    for(const p of particles){p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=125*dt;}
+    particles=particles.filter(p=>p.life>0);
+  }
+  if(state==='running'){
+    accumulator+=dt;
+    while(accumulator>=STEP && state==='running'){update(STEP);accumulator-=STEP;}
+  }else accumulator=0;
+  render();requestAnimationFrame(frame);
+}
+function modeLabel(){byId('mode-label').textContent=settings.difficulty;}
+function soundLabel(){
+  byId('sound').textContent=settings.muted?'♩':'♪';
+  byId('sound').setAttribute('aria-pressed',String(settings.muted));
+}
+for(const id of ['music','effects']){
+  byId(id).value=settings[id];byId(id).addEventListener('input',event=>{
+    settings[id]=Number(event.target.value);audio.unlock();audio.refresh();save();
+  });
+}
+byId('difficulty').value=settings.difficulty;
+byId('difficulty').addEventListener('change',event=>{settings.difficulty=event.target.value;modeLabel();save();});
+byId('sound').addEventListener('click',()=>{
+  settings.muted=!settings.muted;soundLabel();audio.unlock();audio.refresh();save();
+});
+byId('full').addEventListener('click',async()=>{
+  try{
+    if(document.fullscreenElement){await document.exitFullscreen();}
+    else if(document.documentElement.requestFullscreen){await document.documentElement.requestFullscreen();}
+  }catch(error){console.warn('Fullscreen is unavailable.',error);}
+});
+if(!document.fullscreenEnabled)byId('full').hidden=true;
+document.addEventListener('fullscreenchange',()=>byId('full').setAttribute('aria-pressed',String(!!document.fullscreenElement)));
+byId('pause').addEventListener('click',togglePause);
+byId('overlay').addEventListener('click',event=>{
+  const action=event.target.closest('[data-action]')?.dataset.action;
+  if(!action)return;
+  audio.unlock();
+  if(action==='play')start(state==='over'||state==='paused'?(completedFlight?0:district):undefined);
+  else if(action==='district'){
+    const index=Number(event.target.closest('[data-district]').dataset.district);
+    if(Number.isInteger(index)&&index>=0&&index<=unlocked)start(index);
+  }
+  else if(action==='resume')togglePause();
+  else{
+    if(action==='leaderboard')leaderboard();
+    if(action==='route')openRoute();
+    if(action==='profile')profileEditor.open();
+    if(action==='home'){particles=[];shield=0;grace=0;}
+    show(action);
+  }
+});
+canvas.addEventListener('pointerdown',event=>{
+  if(event.button===0 && ['ready','running'].includes(state)){event.preventDefault();lift();}
+});
+window.addEventListener('keydown',event=>{
+  if(event.repeat)return;
+  if(event.code==='Space' && ['ready','running'].includes(state) && !(event.target instanceof HTMLButtonElement)){
+    event.preventDefault();lift();
+  }
+  if(event.code==='Escape' || event.code==='KeyP'){
+    if(['ready','running','paused'].includes(state)){event.preventDefault();togglePause();}
+    else if(['settings','leaderboard','help','route','over'].includes(state) && event.code==='Escape')show('home');
+  }
+});
+document.addEventListener('visibilitychange',()=>{if(document.hidden && ['ready','running'].includes(state))togglePause();});
+modeLabel();soundLabel();applyProfile();show('profile',false);requestAnimationFrame(frame);
+
+</script>
+</head>
+<body>
+<main id="arcade" aria-label="चरी उड arcade">
+<canvas id="scene" aria-label="Flight through Himalayan gates"></canvas>
+<header>
+  <div class="brand"><span class="mark">◈</span> <span class="game-name" lang="ne">चरी उड</span></div>
+  <div class="toolbar"><button id="sound" aria-label="Toggle sound" title="Toggle sound">♪</button><button id="full" aria-label="Toggle fullscreen" title="Toggle fullscreen">⛶</button><button id="pause" aria-label="Pause" title="Pause" hidden>Ⅱ</button></div>
+</header>
+<section id="hud" hidden aria-label="Flight statistics">
+  <div><small>SCORE</small><b id="score">0</b></div><div><small>BEST</small><b id="best">0</b></div><div class="gold"><small>COINS</small><b id="coins">0</b></div>
+  <div id="power" hidden><small>SHIELD</small><b id="shield">0s</b></div>
+</section>
+<div id="overlay">
+<section class="panel pilot-panel" id="profile" aria-labelledby="pilot-title">
+<div class="kicker game-name" lang="ne">चरी उड</div>
+<h1 id="pilot-title">Set up your pilot</h1>
+<form id="pilot-form">
+  <div class="pilot-photo-row">
+    <div class="pilot-portrait"><img id="pilot-preview" alt="Pilot photo preview" hidden><span id="pilot-placeholder" aria-hidden="true">◈</span></div>
+    <div>
+      <label for="pilot-photo">Pilot photo <small>Optional</small></label>
+      <input id="pilot-photo" type="file" accept="image/*">
+      <button id="pilot-remove" type="button" class="quiet" hidden>Remove photo</button>
+    </div>
+  </div>
+  <fieldset id="pilot-adjust" hidden>
+    <legend>Adjust photo crop</legend>
+    <label>Zoom <input id="pilot-zoom" type="range" min="100" max="300" value="100"></label>
+    <label>Left / right <input id="pilot-horizontal" type="range" min="0" max="100" value="50"></label>
+    <label>Up / down <input id="pilot-vertical" type="range" min="0" max="100" value="50"></label>
+  </fieldset>
+  <p id="pilot-status" role="status"></p>
+  <label for="pilot-name">Pilot name</label>
+  <input id="pilot-name" type="text" required maxlength="24" placeholder="Enter your name" autocomplete="nickname">
+  <button type="submit" class="primary">Continue</button>
+</form>
+</section>
+<section class="menu" id="home" aria-labelledby="title" hidden>
+  <div class="kicker"><span></span> HIMALAYAN ARCADE <span></span></div>
+  <h1 id="title" class="game-name" lang="ne">चरी उड</h1>
+  <p class="tagline" id="pilot-greeting"></p>
+  <div class="actions">
+  <button data-action="play" class="primary"><span id="play-label">Play</span> <span id="mode-label">Normal</span></button>
+  <div class="row"><button data-action="settings">Settings</button><button data-action="leaderboard">Leaderboard</button></div>
+  <button data-action="route">Nepal route <span id="tour-progress"></span></button>
+  <button data-action="help" class="quiet">How to Play</button>
+  </div>
+</section>
+<section class="panel" id="settings" hidden>
+<h2>Settings</h2>
+<label>Difficulty<select id="difficulty"><option>Easy</option><option selected>Normal</option><option>Hard</option><option>Extreme</option></select></label>
+<label>Music <input id="music" type="range" min="0" max="100"></label>
+<label>Effects <input id="effects" type="range" min="0" max="100"></label>
+<button data-action="profile">Edit pilot</button>
+<button data-action="home" class="primary">Done</button>
+</section>
+<section class="panel" id="leaderboard" hidden><h2>Leaderboard</h2><p>Best flights on this browser</p><div id="records"></div><button data-action="home" class="primary">Back</button></section>
+<section class="panel" id="route" hidden aria-labelledby="route-title"><h2 id="route-title">Nepal route</h2><p id="route-progress"></p><ol id="route-list"></ol><button data-action="home" class="primary">Back</button></section>
+<section class="panel" id="help" hidden><h2>How to Play</h2><ul><li>Press Space, click, or tap to lift. Release to fall.</li><li>Each gate scores a point. Clear three gates to reach the next district and save a checkpoint.</li><li>Collect amber coins and cyan shields. A shield absorbs one gate hit within six seconds.</li><li>Press Esc or P to pause. Avoid the lower and upper edges.</li></ul><button data-action="home" class="primary">Got it</button></section>
+<section class="panel" id="paused" hidden><h2>Flight paused</h2><button data-action="resume" class="primary">Resume</button><div class="row"><button data-action="play">Restart</button><button data-action="home">Main menu</button></div></section>
+<section class="panel" id="over" hidden><div class="kicker" id="result-label">FLIGHT COMPLETE</div><h2>Run summary</h2><p id="result-district"></p><div id="stats"></div><button id="retry" data-action="play" class="primary">Try Again</button><button data-action="home" class="quiet">Main menu</button></section>
+</div>
+<section id="district-display" aria-label="Current district" hidden>
+  <div id="district-banner" role="status"><b id="district-welcome"></b><small id="district-route-count"></small></div>
+  <span id="district-landmark"></span>
+</section>
+<div id="cue" hidden>SPACE / CLICK / TAP TO LIFT</div>
+<footer><span><span class="game-name" lang="ne">चरी उड</span></span><span id="phase">GOLDEN HOUR</span></footer>
+</main>
+</body>
+</html>
